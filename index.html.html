@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AM/PM Fixing Order Manager</title>
+<style>
+:root{--bg:#fff;--card:#fff;--text:#162033;--muted:#657186;--line:#dce3ec;--soft:#f7f9fc;--primary:#175cd3;--green:#087a47;--red:#c93b3b;--amber:#9b6700;--shadow:0 5px 22px rgba(20,35,60,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}.wrap{max-width:1550px;margin:auto;padding:24px}.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.header h1{margin:0;font-size:28px}.header p{margin:6px 0 0;color:var(--muted)}.badge{background:#fff;border:1px solid var(--line);padding:9px 13px;border-radius:999px;font-weight:700;box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:1.28fr .72fr;gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}h2{margin:0 0 14px;font-size:18px}.form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}label{display:block;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.45px;margin:0 0 6px}input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);outline:none;font-size:14px}input:focus,select:focus{border-color:#8bb4f4;box-shadow:0 0 0 3px rgba(23,92,211,.08)}input[readonly]{background:#f5f7fa}.full{grid-column:1/-1}.span2{grid-column:span 2}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}button{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--primary);color:white}.secondary{background:#edf4ff;color:#174b9b}.danger{background:#fff0f0;color:#af2e2e}.ghost{background:#f2f4f7;color:#445065}.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.kpi{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:13px}.kpi span{font-size:11px;color:var(--muted);display:block}.kpi strong{display:block;margin-top:5px;font-size:20px}.buy{color:var(--green)}.sell{color:var(--red)}.net{color:var(--primary)}
+.convert-card{grid-column:1/-1;background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:13px}.convert-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:end}.hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.45}.contract-badge{display:flex;align-items:center;min-height:43px;padding:9px 11px;border:1px dashed #b9c6d8;border-radius:10px;background:#fff;font-size:13px}.contract-badge b{margin-right:5px}
+.table-card{margin-top:18px}.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.toolbar .group{display:flex;gap:8px;flex-wrap:wrap}.toolbar input,.toolbar select{width:auto;min-width:145px;padding:9px 10px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}table{width:100%;border-collapse:collapse;min-width:1280px}th,td{padding:10px 9px;border-bottom:1px solid #edf0f4;text-align:left;font-size:12px;white-space:nowrap}th{position:sticky;top:0;background:#f7f9fc;color:#58657a;text-transform:uppercase;font-size:10px;letter-spacing:.35px;z-index:1}tr:hover td{background:#fbfcff}.pill{padding:4px 7px;border-radius:999px;font-weight:800;font-size:10px;display:inline-block}.pill.buy{background:#e9f8f0}.pill.sell{background:#fff0f0}.pill.am{background:#eaf3ff;color:#1760a8}.pill.pm{background:#fff6df;color:#9b6700}.small{padding:6px 8px;font-size:11px}.empty{text-align:center;padding:26px;color:var(--muted)}.note{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.45}.edit-banner{display:none;margin-bottom:12px;padding:10px 12px;background:#fff8e6;border:1px solid #f1d58d;border-radius:10px;color:#7a5600;font-size:13px}.summary-table{width:100%;min-width:0;margin-top:10px}.summary-table th,.summary-table td{font-size:11px}.summary-table th{position:static}.settings{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.settings-row{display:grid;grid-template-columns:1.2fr 1fr auto;gap:8px;align-items:end}.settings-list{margin-top:8px;display:flex;gap:7px;flex-wrap:wrap}.tag{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 9px;font-size:11px}.tag button{padding:0;background:none;color:#b72b2b;font-size:13px}.muted{color:var(--muted)}
+@media(max-width:1050px){.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:720px){.wrap{padding:12px}.header{flex-direction:column}.form-grid,.convert-grid,.settings-row{grid-template-columns:1fr}.span2,.full,.convert-card{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header"><div><h1>AM / PM Fixing Order Manager</h1><p>Multiple accounts • custom symbols • automatic Lots ↔ Troy Ounces • editable entries • Excel-ready export</p></div><div class="badge">White Dashboard • Local Save</div></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Fixing Entry</h2>
+      <div id="editBanner" class="edit-banner">Editing an existing entry. Save changes or cancel edit.</div>
+      <div class="form-grid">
+        <div><label>Account</label><input id="account" list="accountList" placeholder="e.g. ACC-01 / Client A"><datalist id="accountList"></datalist></div>
+        <div><label>Client / Fixing ID</label><input id="clientId" value="100069" placeholder="e.g. 100069"></div>
+        <div><label>Symbol</label><input id="symbol" list="symbolList" value="XAUUSD" placeholder="e.g. XAUUSD"><datalist id="symbolList"></datalist></div>
+        <div><label>Trade Date</label><input type="date" id="tradeDate"></div>
+        <div><label>Fixing</label><select id="fixing"><option value="AM">AM Fixing</option><option value="PM">PM Fixing</option></select></div>
+        <div><label>Buy / Sell</label><select id="side"><option value="BUY">Buy</option><option value="SELL">Sell</option></select></div>
+        <div class="span2"><label>Reference / Notes</label><input id="notes" placeholder="Remarks, ticket no., client note, etc."></div>
+
+        <div class="convert-card">
+          <div class="convert-grid">
+            <div><label>Lots</label><input type="number" id="lots" min="0" step="0.0001" placeholder="e.g. 1.00"><div class="hint">Enter Lots → Troy Ounces fills automatically.</div></div>
+            <div><label>Troy Ounces</label><input type="number" id="troyOz" min="0" step="0.0001" placeholder="e.g. 100"><div class="hint">Enter Troy Ounces → Lots fills automatically.</div></div>
+            <div><label>Conversion Used</label><div id="contractInfo" class="contract-badge"><b>XAUUSD:</b> 100 oz per lot</div><div class="hint">Symbol-specific contract size. You can change it below.</div></div>
+            <div><label>Execution Price (USD / Unit)</label><input type="number" id="execPrice" min="0" step="0.0001" placeholder="e.g. 2650.00"><div class="hint">Used to calculate USD order notional.</div></div>
+            <div><label>Order Notional (USD)</label><input type="number" id="notionalUsd" readonly placeholder="Auto"><div class="hint">Troy Oz × Execution Price.</div></div>
+            <div><label>LP Commission (USD)</label><input type="number" id="lpCommission" readonly placeholder="Auto"><div class="hint">Notional ÷ 1,000,000 × commission rate.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid" style="margin-top:12px">
+        <div><label>Refund Status</label><select id="refundStatus"><option value="PENDING">Pending</option><option value="PARTIAL">Partial</option><option value="REFUNDED">Refunded</option></select></div>
+        <div><label>Refund Amount (USD)</label><input type="number" id="refundAmount" min="0" step="0.01" value="0"></div>
+        <div><label>Refund Date</label><input type="date" id="refundDate"></div>
+        <div><label>Refund Reference</label><input id="refundRef" placeholder="LP statement / ticket / note"></div>
+      </div>
+      <div class="actions">
+        <button id="saveBtn" class="primary" onclick="saveEntry()">Add Entry</button>
+        <button class="ghost" onclick="resetForm()">Clear Form</button>
+        <button id="cancelEditBtn" class="secondary" style="display:none" onclick="cancelEdit()">Cancel Edit</button>
+      </div>
+      <div class="note"><b>Conversion:</b> Troy Ounces = Lots × Contract Size. Lots = Troy Ounces ÷ Contract Size. Defaults are common MetaTrader metal sizes; broker specifications can differ, so custom contract sizes are editable below.</div>
+    </div>
+
+    <div class="card">
+      <h2>Overall Summary</h2>
+      <div class="kpis">
+        <div class="kpi"><span>Total Buy Lots</span><strong class="buy" id="buyLots">0.00</strong></div>
+        <div class="kpi"><span>Total Sell Lots</span><strong class="sell" id="sellLots">0.00</strong></div>
+        <div class="kpi"><span>Total Buy Troy Oz</span><strong class="buy" id="buyOz">0.00</strong></div>
+        <div class="kpi"><span>Total Sell Troy Oz</span><strong class="sell" id="sellOz">0.00</strong></div>
+        <div class="kpi"><span>Net Troy Oz</span><strong class="net" id="netOz">0.00</strong></div>
+        <div class="kpi"><span>Total Entries</span><strong id="entryCount">0</strong></div>
+        <div class="kpi"><span>AM Entries</span><strong id="amCount">0</strong></div>
+        <div class="kpi"><span>PM Entries</span><strong id="pmCount">0</strong></div>
+        <div class="kpi"><span>Total LP Commission</span><strong id="totalCommission">$0.00</strong></div>
+        <div class="kpi"><span>Total Refunded</span><strong class="buy" id="totalRefunded">$0.00</strong></div>
+        <div class="kpi"><span>Refund Pending</span><strong class="sell" id="pendingRefund">$0.00</strong></div>
+      </div>
+      <div class="actions">
+        <button class="primary" onclick="exportExcelCSV()">Export All to Excel</button>
+        <button class="secondary" onclick="exportSummaryCSV()">Export Summary</button>
+        <button class="ghost" onclick="downloadBackup()">Backup JSON</button>
+        <button class="danger" onclick="clearAll()">Clear All</button>
+      </div>
+
+      <div class="settings">
+        <h2 style="font-size:15px">LP Commission Setting</h2>
+        <div class="settings-row"><div><label>Commission USD per $1 Million</label><input type="number" id="commissionRate" min="0" step="0.01" value="5"></div><div class="hint">Default: $5 per $1,000,000 notional.</div><button class="secondary" onclick="saveCommissionRate()">Save Rate</button></div>
+      </div>
+      <div class="settings">
+        <h2 style="font-size:15px">Symbol Lot Conversion</h2>
+        <div class="settings-row">
+          <div><label>Symbol</label><input id="settingSymbol" placeholder="e.g. XAUUSD"></div>
+          <div><label>Troy Oz Per 1 Lot</label><input type="number" id="settingOz" min="0.0001" step="0.0001" placeholder="100"></div>
+          <button class="secondary" onclick="saveContract()">Save</button>
+        </div>
+        <div id="settingsList" class="settings-list"></div>
+        <div class="hint">Built-in defaults: XAU = 100 oz/lot, XAG = 5,000 oz/lot, XPT = 100 oz/lot, XPD = 100 oz/lot. Add any custom symbol here.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card table-card">
+    <div class="toolbar">
+      <div class="group">
+        <input id="search" placeholder="Search account / ID / symbol..." oninput="render()">
+        <select id="filterFix" onchange="render()"><option value="ALL">All Fixings</option><option value="AM">AM Only</option><option value="PM">PM Only</option></select>
+        <select id="filterSide" onchange="render()"><option value="ALL">Buy + Sell</option><option value="BUY">Buy Only</option><option value="SELL">Sell Only</option></select>
+        <select id="filterSymbol" onchange="render()"><option value="ALL">All Symbols</option></select>
+      </div>
+      <div class="group"><button class="secondary" onclick="sortNewest()">Sort Newest</button><button class="ghost" onclick="loadSample()">Load Sample</button></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Date</th><th>Account</th><th>Client/Fixing ID</th><th>Symbol</th><th>Fixing</th><th>Side</th><th>Lots</th><th>Troy Oz</th><th>Oz / Lot</th><th>Price</th><th>Notional USD</th><th>LP Comm.</th><th>Refunded</th><th>Refund Status</th><th>Refund Date</th><th>Notes</th><th>Created</th><th>Action</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table><div id="empty" class="empty">No entries yet. Add your first fixing order above.</div>
+    </div>
+  </div>
+
+  <div class="card table-card">
+    <h2>Totals by Symbol & Fixing</h2>
+    <div class="table-wrap"><table class="summary-table"><thead><tr><th>Symbol</th><th>Fixing</th><th>Buy Lots</th><th>Sell Lots</th><th>Net Lots</th><th>Buy Troy Oz</th><th>Sell Troy Oz</th><th>Net Troy Oz</th><th>Entries</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
+  </div>
+</div>
+<script>
+const KEY='fixing_order_manager_v3';
+const OLD_KEY='fixing_order_manager_v2';
+const CONTRACT_KEY='fixing_contract_sizes_v3';
+const COMMISSION_KEY='fixing_lp_commission_rate_v1';
+let commissionRate=Number(localStorage.getItem(COMMISSION_KEY)||5);
+const DEFAULT_CONTRACTS={XAUUSD:100,XAUEUR:100,XAUGBP:100,XAUCHF:100,XAUAUD:100,XAGUSD:5000,XAGEUR:5000,XAGGBP:5000,XAGCHF:5000,XAGAUD:5000,XPTUSD:100,XPDUSD:100};
+let entries=[];let editingUid=null;let contracts={...DEFAULT_CONTRACTS};let conversionLock=false;
+try{contracts={...DEFAULT_CONTRACTS,...JSON.parse(localStorage.getItem(CONTRACT_KEY)||'{}')}}catch(e){}
+try{entries=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){entries=[]}
+if(!entries.length){
+  try{
+    const old=JSON.parse(localStorage.getItem(OLD_KEY)||'[]');
+    if(Array.isArray(old)&&old.length){entries=old.map(x=>{const sym=(x.symbol||'XAUUSD').toUpperCase();const c=getContract(sym);const oz=Number(x.troyOz??x.qty??0)||0;return {uid:x.uid||Date.now()+Math.random(),account:x.account||'',id:x.id||'',symbol:sym,date:x.date||localISODate(),fixing:x.fixing||'AM',side:x.side||'BUY',lots:c?oz/c:0,troyOz:oz,contractSize:c,notes:x.notes||'',created:x.created||new Date().toISOString(),updated:x.updated||''}});localStorage.setItem(KEY,JSON.stringify(entries));}
+  }catch(e){}
+}
+function localISODate(d=new Date()){const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function n(v){return new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:4}).format(Number(v)||0)}
+function money(v){return '$'+new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v)||0)}
+function recalcCommission(){const oz=parseFloat(troyOz.value),p=parseFloat(execPrice.value);const notional=(Number.isFinite(oz)&&Number.isFinite(p))?oz*p:0;notionalUsd.value=notional?Number(notional.toFixed(2)):'';lpCommission.value=notional?Number((notional/1000000*commissionRate).toFixed(6)):''}
+function saveCommissionRate(){const r=parseFloat(commissionRate.value);if(!Number.isFinite(r)||r<0){alert('Enter a valid commission rate.');return}window.commissionRate=r;localStorage.setItem(COMMISSION_KEY,String(r));entries=entries.map(x=>({...x,lpCommission:(+x.notionalUsd||0)/1000000*r}));save();alert('Commission rate saved and existing records recalculated.')} 
+function getContract(sym){sym=String(sym||'').trim().toUpperCase();if(contracts[sym])return Number(contracts[sym]);if(sym.startsWith('XAU'))return 100;if(sym.startsWith('XAG'))return 5000;if(sym.startsWith('XPT')||sym.startsWith('XPD'))return 100;return 0}
+function save(){localStorage.setItem(KEY,JSON.stringify(entries));render()}
+function saveContracts(){localStorage.setItem(CONTRACT_KEY,JSON.stringify(contracts));renderSettings();updateContractInfo();refreshLists()}
+function setDefaults(){tradeDate.value=localISODate();if(!symbol.value)symbol.value='XAUUSD';if(!clientId.value)clientId.value='100069';document.getElementById('commissionRate').value=commissionRate;updateContractInfo();recalcCommission()}
+setDefaults();
+function updateContractInfo(){const sym=symbol.value.trim().toUpperCase();const c=getContract(sym);contractInfo.innerHTML=c?`<b>${esc(sym||'Symbol')}:</b> ${n(c)} oz per lot`:`<b>${esc(sym||'Symbol')}:</b> set oz per lot below`;if(!conversionLock){if(lots.value&&c)convertFromLots();else if(troyOz.value&&c)convertFromOz()}}
+function convertFromLots(){if(conversionLock)return;conversionLock=true;const c=getContract(symbol.value);const l=parseFloat(lots.value);troyOz.value=(c&&Number.isFinite(l))?trimNum(l*c):'';conversionLock=false}
+function convertFromOz(){if(conversionLock)return;conversionLock=true;const c=getContract(symbol.value);const oz=parseFloat(troyOz.value);lots.value=(c&&Number.isFinite(oz))?trimNum(oz/c):'';conversionLock=false}
+function trimNum(v){return Number(v.toFixed(8)).toString()}
+lots.addEventListener('input',()=>{convertFromLots();recalcCommission()});troyOz.addEventListener('input',()=>{convertFromOz();recalcCommission()});execPrice.addEventListener('input',recalcCommission);symbol.addEventListener('input',updateContractInfo);symbol.addEventListener('change',updateContractInfo);
+function formData(){const sym=symbol.value.trim().toUpperCase(),c=getContract(sym);recalcCommission();return {account:account.value.trim(),id:clientId.value.trim(),symbol:sym,date:tradeDate.value,fixing:fixing.value,side:side.value,lots:parseFloat(lots.value),troyOz:parseFloat(troyOz.value),contractSize:c,execPrice:parseFloat(execPrice.value)||0,notionalUsd:parseFloat(notionalUsd.value)||0,lpCommission:parseFloat(lpCommission.value)||0,refundStatus:refundStatus.value,refundAmount:parseFloat(refundAmount.value)||0,refundDate:refundDate.value,refundRef:refundRef.value.trim(),notes:notes.value.trim()}}
+function saveEntry(){const x=formData();if(!x.account){alert('Please enter Account.');account.focus();return}if(!x.id){alert('Please enter Client / Fixing ID.');clientId.focus();return}if(!x.symbol){alert('Please enter Symbol.');symbol.focus();return}if(!x.date){alert('Please enter Trade Date.');tradeDate.focus();return}if(!x.contractSize){alert('No lot conversion is set for '+x.symbol+'. Please add Troy Oz per 1 Lot in Symbol Lot Conversion.');settingSymbol.value=x.symbol;settingOz.focus();return}if(!x.lots||x.lots<=0||!x.troyOz||x.troyOz<=0){alert('Please enter valid Lots or Troy Ounces.');lots.focus();return}
+ if(editingUid!==null){const idx=entries.findIndex(e=>e.uid===editingUid);if(idx>=0)entries[idx]={...entries[idx],...x,updated:new Date().toISOString()};cancelEdit(false)}else{entries.push({...x,uid:Date.now()+Math.random(),created:new Date().toISOString()})}save();resetForm(false)}
+function resetForm(resetDate=true){account.value='';lots.value='';troyOz.value='';execPrice.value='';notionalUsd.value='';lpCommission.value='';refundStatus.value='PENDING';refundAmount.value='0';refundDate.value='';refundRef.value='';notes.value='';side.value='BUY';fixing.value='AM';if(resetDate)tradeDate.value=localISODate();updateContractInfo();account.focus()}
+function editEntry(uid){const x=entries.find(e=>e.uid===uid);if(!x)return;editingUid=uid;account.value=x.account||'';clientId.value=x.id||'';symbol.value=x.symbol||'';tradeDate.value=x.date||'';fixing.value=x.fixing||'AM';side.value=x.side||'BUY';lots.value=x.lots??'';troyOz.value=x.troyOz??'';execPrice.value=x.execPrice||'';notionalUsd.value=x.notionalUsd||'';lpCommission.value=x.lpCommission||'';refundStatus.value=x.refundStatus||'PENDING';refundAmount.value=x.refundAmount||0;refundDate.value=x.refundDate||'';refundRef.value=x.refundRef||'';notes.value=x.notes||'';updateContractInfo();recalcCommission();editBanner.style.display='block';cancelEditBtn.style.display='inline-block';saveBtn.textContent='Save Changes';window.scrollTo({top:0,behavior:'smooth'})}
+function cancelEdit(clear=true){editingUid=null;editBanner.style.display='none';cancelEditBtn.style.display='none';saveBtn.textContent='Add Entry';if(clear)resetForm()}
+function del(uid){if(confirm('Delete this entry?')){entries=entries.filter(x=>x.uid!==uid);if(editingUid===uid)cancelEdit();save()}}
+function clearAll(){if(entries.length&&confirm('Delete ALL saved entries from this browser?')){entries=[];cancelEdit();save()}}
+function sortKey(x){return `${x.date||''}|${x.created||''}`}
+function sortedEntries(){return entries.slice().sort((a,b)=>sortKey(a).localeCompare(sortKey(b)))}
+function sortNewest(){entries=entries.slice().sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));save()}
+function refreshLists(){const syms=[...new Set([...Object.keys(contracts),...entries.map(x=>x.symbol)].filter(Boolean))].sort();symbolList.innerHTML=syms.map(s=>`<option value="${esc(s)}"></option>`).join('');const selected=filterSymbol.value;filterSymbol.innerHTML='<option value="ALL">All Symbols</option>'+syms.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');if(syms.includes(selected))filterSymbol.value=selected;const acc=[...new Set(entries.map(x=>x.account).filter(Boolean))].sort();accountList.innerHTML=acc.map(a=>`<option value="${esc(a)}"></option>`).join('')}
+function filtered(){const s=search.value.toLowerCase().trim(),ff=filterFix.value,fs=filterSide.value,fsy=filterSymbol.value;return entries.filter(x=>(ff==='ALL'||x.fixing===ff)&&(fs==='ALL'||x.side===fs)&&(fsy==='ALL'||x.symbol===fsy)&&(!s||[x.account,x.id,x.symbol,x.date,x.notes].join(' ').toLowerCase().includes(s))).sort((a,b)=>sortKey(b).localeCompare(sortKey(a)))}
+function render(){refreshLists();const list=filtered();tbody.innerHTML='';empty.style.display=list.length?'none':'block';list.forEach((x,i)=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${i+1}</td><td>${esc(x.date)}</td><td>${esc(x.account||'')}</td><td>${esc(x.id||'')}</td><td><b>${esc(x.symbol||'')}</b></td><td><span class="pill ${(x.fixing||'').toLowerCase()}">${esc(x.fixing)}</span></td><td><span class="pill ${(x.side||'').toLowerCase()}">${esc(x.side)}</span></td><td>${n(x.lots)}</td><td>${n(x.troyOz)}</td><td>${n(x.contractSize||getContract(x.symbol))}</td><td>${x.execPrice?money(x.execPrice):'—'}</td><td>${x.notionalUsd?money(x.notionalUsd):'—'}</td><td>${money(x.lpCommission||0)}</td><td>${money(x.refundAmount||0)}</td><td><span class="pill ${(x.refundStatus==='REFUNDED'?'buy':x.refundStatus==='PARTIAL'?'am':'sell')}">${esc(x.refundStatus||'PENDING')}</span></td><td>${esc(x.refundDate||'—')}</td><td>${esc(x.notes||'—')}${x.refundRef?' / '+esc(x.refundRef):''}</td><td>${esc(formatStamp(x.created))}</td><td><button class="secondary small" onclick="editEntry(${x.uid})">Edit</button> <button class="danger small" onclick="del(${x.uid})">Delete</button></td>`;tbody.appendChild(tr)});updateSummary();renderSettings()}
+function formatStamp(v){if(!v)return'';try{return new Date(v).toLocaleString()}catch(e){return v}}
+function updateSummary(){const b=entries.filter(x=>x.side==='BUY'),s=entries.filter(x=>x.side==='SELL');const bl=b.reduce((a,x)=>a+(+x.lots||0),0),sl=s.reduce((a,x)=>a+(+x.lots||0),0),bo=b.reduce((a,x)=>a+(+x.troyOz||0),0),so=s.reduce((a,x)=>a+(+x.troyOz||0),0);buyLots.textContent=n(bl);sellLots.textContent=n(sl);buyOz.textContent=n(bo);sellOz.textContent=n(so);netOz.textContent=n(bo-so);entryCount.textContent=entries.length;amCount.textContent=entries.filter(x=>x.fixing==='AM').length;pmCount.textContent=entries.filter(x=>x.fixing==='PM').length;const tc=entries.reduce((a,x)=>a+(+x.lpCommission||0),0),tr=entries.reduce((a,x)=>a+(+x.refundAmount||0),0);totalCommission.textContent=money(tc);totalRefunded.textContent=money(tr);pendingRefund.textContent=money(Math.max(0,tc-tr));summaryBody.innerHTML=groupSummary().map(g=>`<tr><td><b>${esc(g.symbol)}</b></td><td>${g.fixing}</td><td class="buy">${n(g.buyLots)}</td><td class="sell">${n(g.sellLots)}</td><td>${n(g.buyLots-g.sellLots)}</td><td class="buy">${n(g.buyOz)}</td><td class="sell">${n(g.sellOz)}</td><td>${n(g.buyOz-g.sellOz)}</td><td>${g.count}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">No summary data yet.</td></tr>'}
+function groupSummary(){const m={};entries.forEach(x=>{const k=x.symbol+'||'+x.fixing;if(!m[k])m[k]={symbol:x.symbol,fixing:x.fixing,buyLots:0,sellLots:0,buyOz:0,sellOz:0,count:0};const g=m[k];g.count++;if(x.side==='BUY'){g.buyLots+=+x.lots||0;g.buyOz+=+x.troyOz||0}else{g.sellLots+=+x.lots||0;g.sellOz+=+x.troyOz||0}});return Object.values(m).sort((a,b)=>a.symbol.localeCompare(b.symbol)||a.fixing.localeCompare(b.fixing))}
+function csv(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+function downloadCSV(name,rows){const text='\uFEFF'+rows.map(r=>r.map(csv).join(',')).join('\r\n');const blob=new Blob([text],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportExcelCSV(){if(!entries.length){alert('No entries to export.');return}const rows=[['Trade Date','Account','Client/Fixing ID','Symbol','Fixing','Side','Lots','Troy Ounces','Troy Oz per Lot','Execution Price USD','Order Notional USD','LP Commission USD','Refund Status','Refund Amount USD','Refund Date','Refund Reference','Notes','Entry Generated At','Updated At']];sortedEntries().forEach(x=>rows.push([x.date,x.account,x.id,x.symbol,x.fixing,x.side,x.lots,x.troyOz,x.contractSize||getContract(x.symbol),x.execPrice||0,x.notionalUsd||0,x.lpCommission||0,x.refundStatus||'PENDING',x.refundAmount||0,x.refundDate||'',x.refundRef||'',x.notes,x.created||'',x.updated||'']));rows.push([]);rows.push(['OVERALL TOTALS']);const bl=entries.filter(x=>x.side==='BUY').reduce((a,x)=>a+(+x.lots||0),0),sl=entries.filter(x=>x.side==='SELL').reduce((a,x)=>a+(+x.lots||0),0),bo=entries.filter(x=>x.side==='BUY').reduce((a,x)=>a+(+x.troyOz||0),0),so=entries.filter(x=>x.side==='SELL').reduce((a,x)=>a+(+x.troyOz||0),0);rows.push(['Total Buy Lots',bl]);rows.push(['Total Sell Lots',sl]);rows.push(['Net Lots',bl-sl]);rows.push(['Total Buy Troy Oz',bo]);rows.push(['Total Sell Troy Oz',so]);rows.push(['Net Troy Oz',bo-so]);rows.push(['Total Entries',entries.length]);rows.push(['LP Commission Rate per $1M',commissionRate]);rows.push(['Total LP Commission USD',entries.reduce((a,x)=>a+(+x.lpCommission||0),0)]);rows.push(['Total Refunded USD',entries.reduce((a,x)=>a+(+x.refundAmount||0),0)]);rows.push(['Refund Pending USD',Math.max(0,entries.reduce((a,x)=>a+(+x.lpCommission||0),0)-entries.reduce((a,x)=>a+(+x.refundAmount||0),0))]);rows.push([]);rows.push(['TOTALS BY SYMBOL & FIXING']);rows.push(['Symbol','Fixing','Buy Lots','Sell Lots','Net Lots','Buy Troy Oz','Sell Troy Oz','Net Troy Oz','Entries']);groupSummary().forEach(g=>rows.push([g.symbol,g.fixing,g.buyLots,g.sellLots,g.buyLots-g.sellLots,g.buyOz,g.sellOz,g.buyOz-g.sellOz,g.count]));downloadCSV('Fixing_Orders_All_'+localISODate()+'.csv',rows)}
+function exportSummaryCSV(){if(!entries.length){alert('No entries to export.');return}const rows=[['Symbol','Fixing','Buy Lots','Sell Lots','Net Lots','Buy Troy Oz','Sell Troy Oz','Net Troy Oz','Entries']];groupSummary().forEach(g=>rows.push([g.symbol,g.fixing,g.buyLots,g.sellLots,g.buyLots-g.sellLots,g.buyOz,g.sellOz,g.buyOz-g.sellOz,g.count]));downloadCSV('Fixing_Summary_'+localISODate()+'.csv',rows)}
+function downloadBackup(){const data={entries,contracts};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Fixing_Dashboard_Backup_'+localISODate()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function saveContract(){const sym=settingSymbol.value.trim().toUpperCase(),oz=parseFloat(settingOz.value);if(!sym){alert('Enter a symbol.');return}if(!oz||oz<=0){alert('Enter valid Troy Oz per 1 Lot.');return}contracts[sym]=oz;saveContracts();settingSymbol.value='';settingOz.value='';if(symbol.value.trim().toUpperCase()===sym)updateContractInfo()}
+function removeContract(sym){if(DEFAULT_CONTRACTS[sym]!==undefined){if(confirm('Reset '+sym+' to default '+DEFAULT_CONTRACTS[sym]+' oz per lot?')){contracts[sym]=DEFAULT_CONTRACTS[sym];saveContracts()}}else if(confirm('Remove custom conversion for '+sym+'?')){delete contracts[sym];saveContracts()}}
+function renderSettings(){const keys=Object.keys(contracts).sort();settingsList.innerHTML=keys.map(k=>`<span class="tag"><b>${esc(k)}</b> ${n(contracts[k])} oz/lot <button title="Remove / reset" onclick="removeContract('${esc(k)}')">×</button></span>`).join('')}
+function loadSample(){if(entries.length&&!confirm('Add sample entries to current data?'))return;const d=localISODate(),now=new Date().toISOString();entries.push({uid:Date.now()+1,date:d,account:'Account A',id:'100069',symbol:'XAUUSD',fixing:'AM',side:'BUY',lots:1,troyOz:100,contractSize:100,notes:'Sample gold AM order',created:now},{uid:Date.now()+2,date:d,account:'Account B',id:'100070',symbol:'XAGUSD',fixing:'PM',side:'SELL',lots:0.1,troyOz:500,contractSize:5000,notes:'Sample silver PM order',created:new Date(Date.now()+1000).toISOString()});save()}
+render();
+</script>
+</body>
+</html>
